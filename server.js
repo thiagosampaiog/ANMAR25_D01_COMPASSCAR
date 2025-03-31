@@ -7,6 +7,7 @@ const app = express()
 const port = 3000;
 
 app.use(express.json());
+
 console.log("Rotas carregadas!");
 app.use("/api/v1", carRoutes);
 

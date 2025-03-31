@@ -8,21 +8,52 @@ router.post("/cars", async (req, res) => {
     const { brand, model, year, plate } = req.body;
     const errors = [];
 
+    function isValidPlate(plate) {
+      // Verifica se o comprimento é exatamente 8 caracteres
+      if (plate.lenght !== 8) {
+        return false;
+      }
+      // Verifica se os 3 primeiros caracteres são letras maiúsculas
+      for(let i = 0; i < 3; i++){
+        if(plate[i] < 'A' || plate[i] > 'Z') {
+          return false;
+        }
+      }
+      // Verifica se o quarto caractere é um hífen
+      if(plate[3] !== '-') {
+        return false;
+      }
+      // Verifica se o quinto caractere é um número
+      if(isNaN(plate[4])) {
+        return false;
+      }
+      // Verifica se o sexto caractere é uma letra maiúscula ou um número
+      if(!(plate[5] >= 'A' && plate[5] <= 'Z') &&
+       !(plate[5] >= '0' && plate[5] <= '9' )) { return false }
+      // Verifica se os dois últimos caracteres são números array 6 e 7
+      for(let i = 6; i < 8; i++){
+        if(plate[i] < '0' || plate[i] > '9') {
+          return false;
+        }
+      }
+      // se tudo passar a placa é válida
+      return true;
+    }
+      // Se todas as verificações passaram, a placa é válida
+    
+
     // Validações
     if (!brand) errors.push("brand is required");
     if (!model) errors.push("model is required");
     if (!year) {
       errors.push("year is required");
-    } else if (year < 2016 || year > 2026) {
-      errors.push("year must be between 2016 and 2026");
+    } else if (year < 2015 || year > 2025) {
+      errors.push("year must be between 2015 and 2025");
     }
-    if (!plate) {
-      errors.push("plate is required");
-    } else {
-      const plateRegex = /^[A-Z]{3}-\d[A-J0-9]\d{2}$/;
-      if (!plateRegex.test(plate)) {
-        errors.push("plate must be in the correct format ABC-1D23");
-      }
+    if(!plate) {
+      errors.push('plate is required')
+    } else if (isValidPlate(plate)) {
+      errors.push("plate must be in the correct format ABC-1C34")
     }
 
     // Retorna erros de validação
@@ -41,10 +72,11 @@ router.post("/cars", async (req, res) => {
     return res.status(201).json(newCar);
   } catch (error) {
     console.error("Erro no endpoint POST /api/v1/cars:", error);
-    return res.status(500).json({ errors: ["an internal server error occurred"] });
+    return res
+      .status(500)
+      .json({ errors: ["an internal server error occurred"] });
   }
 });
-
 
 router.get("/test", (req, res) => {
   res.send("Rota de teste funcionando!");
