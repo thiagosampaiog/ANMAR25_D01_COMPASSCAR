@@ -10,37 +10,40 @@ router.post("/cars", async (req, res) => {
 
     function isValidPlate(plate) {
       // Verifica se o comprimento é exatamente 8 caracteres
-      if (plate.lenght !== 8) {
+      if (plate.length !== 8) {
         return false;
       }
       // Verifica se os 3 primeiros caracteres são letras maiúsculas
-      for(let i = 0; i < 3; i++){
-        if(plate[i] < 'A' || plate[i] > 'Z') {
+      for (let i = 0; i < 3; i++) {
+        if (plate[i] < "A" || plate[i] > "Z") {
           return false;
         }
       }
       // Verifica se o quarto caractere é um hífen
-      if(plate[3] !== '-') {
+      if (plate[3] !== "-") {
         return false;
       }
       // Verifica se o quinto caractere é um número
-      if(isNaN(plate[4])) {
+      if (isNaN(plate[4])) {
         return false;
       }
       // Verifica se o sexto caractere é uma letra maiúscula ou um número
-      if(!(plate[5] >= 'A' && plate[5] <= 'Z') &&
-       !(plate[5] >= '0' && plate[5] <= '9' )) { return false }
+      if (
+        (plate[5] < "A" || plate[5] > "Z") && 
+        (plate[5] < "0" || plate[5] > "9")    
+      ) {
+        return false;
+      }
       // Verifica se os dois últimos caracteres são números array 6 e 7
-      for(let i = 6; i < 8; i++){
-        if(plate[i] < '0' || plate[i] > '9') {
+      for (let i = 6; i < 8; i++) {
+        if (plate[i] < "0" || plate[i] > "9") {
           return false;
         }
       }
       // se tudo passar a placa é válida
       return true;
     }
-      // Se todas as verificações passaram, a placa é válida
-    
+    // Se todas as verificações passaram, a placa é válida
 
     // Validações
     if (!brand) errors.push("brand is required");
@@ -50,10 +53,10 @@ router.post("/cars", async (req, res) => {
     } else if (year < 2015 || year > 2025) {
       errors.push("year must be between 2015 and 2025");
     }
-    if(!plate) {
-      errors.push('plate is required')
-    } else if (isValidPlate(plate)) {
-      errors.push("plate must be in the correct format ABC-1C34")
+    if (!plate) {
+      errors.push("plate is required");
+    } else if (!isValidPlate(plate)) {
+      errors.push("plate must be in the correct format ABC-1C34");
     }
 
     // Retorna erros de validação
