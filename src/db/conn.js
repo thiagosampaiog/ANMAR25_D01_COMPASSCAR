@@ -6,4 +6,6 @@ const sequelize = new Sequelize("compasscar", "root", "", {
 });
 
 
+
+
 module.exports = sequelize;

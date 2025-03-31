@@ -1,6 +1,8 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/conn");
 
+
+
 const Car = sequelize.define("Car", {
   id: {
     type: DataTypes.INTEGER,
@@ -33,5 +35,9 @@ const Car = sequelize.define("Car", {
   tableName: "cars",
   timestamps: false,
 });
+
+
+
+
 
 module.exports = Car;
