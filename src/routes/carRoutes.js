@@ -80,7 +80,7 @@ router.post("/cars", async (req, res) => {
 
 router.put("/cars/:id/items", async (req, res) => {
   const carId = req.params.id; 
-  const { items } = req.body; 
+  const items = req.body; 
 
   if(!items || !Array.isArray(items)){
     return res
@@ -114,12 +114,9 @@ router.put("/cars/:id/items", async (req, res) => {
       car_id: carId,
     }))
 
-    const createdItems = await CarItem.bulkCreate(newItems);
+    await CarItem.bulkCreate(newItems);
 
-    return res.status(200).json({ 
-      message: 'Items updated successfully',
-      items: createdItems,
-    });
+    return res.status(204).send();
 
 
 
