@@ -5,7 +5,4 @@ const sequelize = new Sequelize("compasscar", "root", "", {
   dialect: "mysql",
 });
 
-
-
-
 module.exports = sequelize;
