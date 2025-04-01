@@ -162,7 +162,7 @@ router.get("/cars", async (req, res) => {
   const pageLimit = Math.min(Math.max(parseInt(limit), 1), 10);
   const offset = (pageNumber - 1) * pageLimit;
 
-  const cars = await Car.findAndCountAll({ 
+  const cars = await Car.findAndCountAll({
     where: filters,
     limit: pageLimit,
     offset: offset,
@@ -175,6 +175,20 @@ router.get("/cars", async (req, res) => {
     pages: totalPages,
     data: cars.rows,
   });
+});
+
+router.delete("/cars/:id", async (req, res) => {
+  const carId = req.params.id;
+  const errors = [];
+
+  const deletedCount = await Car.destroy({ where: { id: carId } });
+
+  if (deletedCount === 0) {
+    errors.push("car not found");
+    return res.status(404).json({ errors: errors });
+  }
+
+  return res.status(204).send();
 });
 
 console.log("Arquivo carRoutes.js carregado!");
