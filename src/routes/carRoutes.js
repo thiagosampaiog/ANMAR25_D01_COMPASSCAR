@@ -4,7 +4,6 @@ var router = express.Router();
 const { Car, CarItem } = require('../models/index')
 
 router.post("/cars", async (req, res) => {
-  try {
     const { brand, model, year, plate } = req.body;
     const errors = [];
 
@@ -70,12 +69,6 @@ router.post("/cars", async (req, res) => {
 
     const newCar = await Car.create({ brand, model, year, plate });
     return res.status(201).json(newCar);
-  } catch (error) {
-    console.error("Erro no endpoint POST /api/v1/cars:", error);
-    return res
-      .status(500)
-      .json({ errors: ["an internal server error occurred"] });
-  }
 });
 
 router.put("/cars/:id/items", async (req, res) => {
@@ -119,6 +112,34 @@ router.put("/cars/:id/items", async (req, res) => {
 });
 
 router.get('/cars/:id', async (req, res) => {
+  const carId = req.params.id; 
+  const errors = [];
+
+  const car = await Car.findByPk(carId, { // pega os dados do banco
+    include: {
+      model: CarItem, // gera array car.CarItems do objeto retornado
+      attributes: ["name"],
+    },
+  }); 
+
+  if(!car){ 
+    errors.push('car not found');
+    return res.status(404).json({ errors: errors });
+  }
+
+  const items = car.CarItems.map((item) => item.name);
+  // transforma array de objetos em array com os nomes
+
+  return res.status(200).json({
+    id: car.id,
+    brand:car.brand,
+    model: car.model,
+    year: car.year,
+    plate: car.plate,
+    created_at: car.createdAt,
+    items: items,
+  });
+
 
 
 })
