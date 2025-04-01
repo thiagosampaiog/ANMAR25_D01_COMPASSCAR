@@ -15,11 +15,9 @@ app.get('/', (req, res) => {
   res.send('Olá Mundo!')
 })
 
-
 app.listen(port, () => {
   console.log(`App de exemplo esta rodando na porta ${port}`)
 })
-
 
 conn.authenticate()
   .then(() => console.log("Conectado ao banco de dados!"))

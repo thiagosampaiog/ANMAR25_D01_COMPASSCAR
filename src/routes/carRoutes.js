@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 
-const Car = require("../models/car");
+const { Car, CarItem } = require('../models/index')
 
 router.post("/cars", async (req, res) => {
   try {
@@ -43,7 +43,6 @@ router.post("/cars", async (req, res) => {
       // se tudo passar a placa é válida
       return true;
     }
-    // Se todas as verificações passaram, a placa é válida
 
     // Validações
     if (!brand) errors.push("brand is required");
@@ -81,9 +80,58 @@ router.post("/cars", async (req, res) => {
   }
 });
 
-router.get("/test", (req, res) => {
-  res.send("Rota de teste funcionando!");
+router.put("/cars/:id/items", async (req, res) => {
+  const carId = req.params.id; // pega o id do cars gerado
+  const { items } = req.body; // cria um objeto com os items do body
+
+  if(!items || !Array.isArray(items)){
+    return res
+    .status(400)
+    .json({ errors: ["items is required"]})
+  }
+  if(items.length > 5) {
+    return res
+    .status(400)
+    .json({ errors: ["items must be a maximum of 5"]})
+  }
+
+
+    const seen = new Set();
+
+    for(const item of items){
+      if(seen.has(item)) {
+        return res.status(400).json({ errors: ["items cannot be repeated"]})
+      }
+      seen.add(item);
+    }
+
+    const existingCar = await Car.findByPk(carId);
+    if(!existingCar){
+      return res.status(404).json({ errors: ["car not found"] });
+    }
+
+    await CarItem.destroy({ where: { car_id: carId }});
+
+    const newItems = items.map((item) => ({ // utilizado para transformar array de itens em um novo array de objetos
+      name: item,
+      car_id: carId,
+    }))
+
+    const createdItems = await CarItem.bulkCreate(newItems);
+
+    return res.status(200).json({ 
+      message: 'Items updated successfully',
+      items: createdItems,
+    });
+
+
+
 });
+
+
+
+
+
 
 console.log("Arquivo carRoutes.js carregado!");
 module.exports = router;
