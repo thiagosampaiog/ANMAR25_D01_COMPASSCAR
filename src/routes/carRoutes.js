@@ -44,7 +44,6 @@ router.post("/cars", async (req, res) => {
       return true;
     }
 
-    // Validações
     if (!brand) errors.push("brand is required");
     if (!model) errors.push("model is required");
     if (!year) {
@@ -69,7 +68,6 @@ router.post("/cars", async (req, res) => {
       return res.status(409).json({ errors: ["car already registered"] });
     }
 
-    // Cria o carro
     const newCar = await Car.create({ brand, model, year, plate });
     return res.status(201).json(newCar);
   } catch (error) {
@@ -81,8 +79,8 @@ router.post("/cars", async (req, res) => {
 });
 
 router.put("/cars/:id/items", async (req, res) => {
-  const carId = req.params.id; // pega o id do cars gerado
-  const { items } = req.body; // cria um objeto com os items do body
+  const carId = req.params.id; 
+  const { items } = req.body; 
 
   if(!items || !Array.isArray(items)){
     return res
@@ -94,7 +92,6 @@ router.put("/cars/:id/items", async (req, res) => {
     .status(400)
     .json({ errors: ["items must be a maximum of 5"]})
   }
-
 
     const seen = new Set();
 
@@ -112,7 +109,7 @@ router.put("/cars/:id/items", async (req, res) => {
 
     await CarItem.destroy({ where: { car_id: carId }});
 
-    const newItems = items.map((item) => ({ // utilizado para transformar array de itens em um novo array de objetos
+    const newItems = items.map((item) => ({ 
       name: item,
       car_id: carId,
     }))
