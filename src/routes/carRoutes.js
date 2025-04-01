@@ -141,7 +141,41 @@ router.get("/cars/:id", async (req, res) => {
   });
 });
 
-router.get("/cars", async (req, res) => {});
+router.get("/cars", async (req, res) => {
+  const { year, final_plate, brand, page = 1, limit = 5 } = req.query;
+
+  const filters = {};
+
+  if (year) {
+    filters.year = { [Op.gte]: year };
+  }
+
+  if (final_plate) {
+    filters.plate = { [Op.like]: `%${final_plate}` };
+  }
+
+  if (brand) {
+    filters.brand = { [Op.like]: `%${brand}%` };
+  }
+
+  const pageNumber = Math.max(parseInt(page), 1);
+  const pageLimit = Math.min(Math.max(parseInt(limit), 1), 10);
+  const offset = (pageNumber - 1) * pageLimit;
+
+  const cars = await Car.findAndCountAll({ 
+    where: filters,
+    limit: pageLimit,
+    offset: offset,
+  });
+
+  const totalPages = Math.ceil(cars.count / pageLimit);
+
+  return res.status(200).json({
+    count: cars.count,
+    pages: totalPages,
+    data: cars.rows,
+  });
+});
 
 console.log("Arquivo carRoutes.js carregado!");
 module.exports = router;
