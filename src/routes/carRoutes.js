@@ -80,24 +80,22 @@ router.post("/cars", async (req, res) => {
 
 router.put("/cars/:id/items", async (req, res) => {
   const carId = req.params.id; 
-  const items = req.body; 
+  const items = req.body;
+  const errors = [];
 
   if(!items || !Array.isArray(items)){
-    return res
-    .status(400)
-    .json({ errors: ["items is required"]})
+    errors.push("items is required")
   }
-  if(items.length > 5) {
-    return res
-    .status(400)
-    .json({ errors: ["items must be a maximum of 5"]})
+  if(items && items.length > 5) {
+    errors.push("items must be a maximum of 5")
   }
 
     const seen = new Set();
 
     for(const item of items){
       if(seen.has(item)) {
-        return res.status(400).json({ errors: ["items cannot be repeated"]})
+        errors.push("items cannot be repeated");
+        break;
       }
       seen.add(item);
     }
@@ -118,11 +116,12 @@ router.put("/cars/:id/items", async (req, res) => {
 
     return res.status(204).send();
 
-
-
 });
 
+router.get('/cars/:id', async (req, res) => {
 
+
+})
 
 
 
