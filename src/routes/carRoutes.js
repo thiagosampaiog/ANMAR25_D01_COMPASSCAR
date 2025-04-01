@@ -57,12 +57,10 @@ router.post("/cars", async (req, res) => {
       errors.push("plate must be in the correct format ABC-1C34");
     }
 
-    // Retorna erros de validação
     if (errors.length > 0) {
       return res.status(400).json({ errors });
     }
 
-    // Verifica duplicidade de placa
     const existingCar = await Car.findOne({ where: { plate } });
     if (existingCar) {
       return res.status(409).json({ errors: ["car already registered"] });
@@ -101,6 +99,10 @@ router.put("/cars/:id/items", async (req, res) => {
       seen.add(item);
     }
 
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+
     const existingCar = await Car.findByPk(carId);
     if (!existingCar) {
       return res.status(404).json({ errors: ["car not found"] });
@@ -127,23 +129,21 @@ router.put("/cars/:id/items", async (req, res) => {
 router.get("/cars/:id", async (req, res) => {
   try {
     const carId = req.params.id;
-    const errors = [];
 
     const car = await Car.findByPk(carId, {
-      // pega os dados do banco
+ 
       include: {
-        model: CarItem, // gera array car.CarItems do objeto retornado
+        model: CarItem, 
         attributes: ["name"],
       },
     });
 
     if (!car) {
-      errors.push("car not found");
-      return res.status(404).json({ errors: errors });
+      return res.status(404).json({ errors: ['car not found'] });
     }
 
     const items = car.CarItems.map((item) => item.name);
-    // transforma array de objetos em array com os nomes
+  
 
     return res.status(200).json({
       id: car.id,
@@ -208,13 +208,11 @@ router.get("/cars", async (req, res) => {
 router.delete("/cars/:id", async (req, res) => {
   try {
     const carId = req.params.id;
-    const errors = [];
 
     const deletedCount = await Car.destroy({ where: { id: carId } });
 
     if (deletedCount === 0) {
-      errors.push("car not found");
-      return res.status(404).json({ errors: errors });
+      return res.status(404).json({ errors: ['car not found'] });
     }
 
     return res.status(204).send();
