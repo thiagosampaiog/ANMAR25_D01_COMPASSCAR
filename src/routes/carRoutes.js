@@ -191,5 +191,88 @@ router.delete("/cars/:id", async (req, res) => {
   return res.status(204).send();
 });
 
+router.patch("/cars/:id", async (req, res) => {
+  const { brand, model, year, plate } = req.body;
+  const carId = req.params.id;
+  const errors = [];
+
+  const car = await Car.findByPk(carId);
+  if (!car) {
+    return res.status(409).json({ errors: ["car not found"] });
+  }
+
+  // Ignorar campos vazios ou nulos:
+  const updates = {};
+  if (brand) updates.brand = brand;
+  if (model) updates.model = model;
+  if (year) updates.year = year;
+  if (plate) updates.plate = plate;
+
+  if (brand && !model) {
+    errors.push("models must also be informed");
+  }
+
+  if (year && (year < 2015 || year > 2025)) {
+    errors.push("year must be between 2015 and 2025");
+  }
+
+  function isValidPlate(plate) {
+    // Verifica se o comprimento é exatamente 8 caracteres
+    if (plate.length !== 8) {
+      return false;
+    }
+    // Verifica se os 3 primeiros caracteres são letras maiúsculas
+    for (let i = 0; i < 3; i++) {
+      if (plate[i] < "A" || plate[i] > "Z") {
+        return false;
+      }
+    }
+    // Verifica se o quarto caractere é um hífen
+    if (plate[3] !== "-") {
+      return false;
+    }
+    // Verifica se o quinto caractere é um número
+    if (isNaN(plate[4])) {
+      return false;
+    }
+    // Verifica se o sexto caractere é uma letra maiúscula ou um número
+    if (
+      (plate[5] < "A" || plate[5] > "Z") &&
+      (plate[5] < "0" || plate[5] > "9")
+    ) {
+      return false;
+    }
+    // Verifica se os dois últimos caracteres são números array 6 e 7
+    for (let i = 6; i < 8; i++) {
+      if (plate[i] < "0" || plate[i] > "9") {
+        return false;
+      }
+    }
+    // se tudo passar a placa é válida
+    return true;
+  }
+
+  if (plate && !isValidPlate(plate)) {
+    errors.push("plate must be in the correct format ABC-1C34");
+  }
+
+  if (plate) {
+    const existingCar = await Car.findOne({
+      where: { plate, id: { [Op.ne]: carId } },
+    });
+    if (existingCar) {
+      return res.status(409).json({ errors: ["car already registred"] });
+    }
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  await Car.update(updates);
+
+  return res.status(204).send();
+});
+
 console.log("Arquivo carRoutes.js carregado!");
 module.exports = router;
