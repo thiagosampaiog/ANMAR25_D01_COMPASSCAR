@@ -232,7 +232,7 @@ router.patch("/cars/:id", async (req, res) => {
 
     const car = await Car.findByPk(carId);
     if (!car) {
-      return res.status(409).json({ errors: ["car not found"] });
+      return res.status(404).json({ errors: ["car not found"] });
     }
 
     const updates = {};
@@ -302,7 +302,7 @@ router.patch("/cars/:id", async (req, res) => {
       return res.status(400).json({ errors });
     }
 
-    await Car.update(updates);
+    await Car.update(updates, { where: { id: carId }});
 
     return res.status(204).send();
   } catch (error) {
