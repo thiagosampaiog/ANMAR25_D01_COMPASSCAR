@@ -23,5 +23,9 @@ app.listen(port, () => {
 
 conn
   .authenticate()
-  .then(() => console.log("Conectado ao banco de dados!"))
+  .then(() => {
+    console.log("Conectado ao banco de dados!");
+    return conn.sync(); 
+  })
+  .then(() => console.log("Modelos sincronizados com o banco de dados!"))
   .catch((err) => console.error("Erro ao conectar:", err));
