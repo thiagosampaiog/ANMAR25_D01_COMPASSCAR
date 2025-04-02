@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 
+const { Op } = require("sequelize");
 const { Car, CarItem } = require("../models/index");
 
 router.post("/cars", async (req, res) => {
