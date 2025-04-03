@@ -4,53 +4,53 @@ var router = express.Router();
 const { Op } = require("sequelize");
 const { Car, CarItem } = require("../models/index");
 
+function isValidPlate(plate) {
+  if (plate.length !== 8) {
+    return false;
+  }
+  for (let i = 0; i < 3; i++) {
+    if (plate[i] < "A" || plate[i] > "Z") {
+      return false;
+    }
+  }
+  if (plate[3] !== "-") {
+    return false;
+  }
+  if (isNaN(plate[4])) {
+    return false;
+  }
+  if (
+    (plate[5] < "A" || plate[5] > "J") &&
+    (plate[5] < "0" || plate[5] > "9")
+  ) {
+    return false;
+  }
+  for (let i = 5; i < 7; i++) {
+    if (plate[i] < "0" || plate[i] > "9") {
+      return false;
+    }
+  }
+  return true;
+}
+
 router.post("/cars", async (req, res) => {
   try {
     const { brand, model, year, plate } = req.body;
     const errors = [];
 
-    function isValidPlate(plate) {
-      // Verifica se o comprimento é exatamente 8 caracteres
-      if (plate.length !== 8) {
-        return false;
-      }
-      // Verifica se os 3 primeiros caracteres são letras maiúsculas
-      for (let i = 0; i < 3; i++) {
-        if (plate[i] < "A" || plate[i] > "Z") {
-          return false;
-        }
-      }
-      // Verifica se o quarto caractere é um hífen
-      if (plate[3] !== "-") {
-        return false;
-      }
-      // Verifica se o quinto caractere é um número
-      if (isNaN(plate[4])) {
-        return false;
-      }
-      // Verifica se o sexto caractere é uma letra maiúscula ou um número
-      if (
-        (plate[5] < "A" || plate[5] > "Z") &&
-        (plate[5] < "0" || plate[5] > "9")
-      ) {
-        return false;
-      }
-      // Verifica se os dois últimos caracteres são números array 6 e 7
-      for (let i = 6; i < 8; i++) {
-        if (plate[i] < "0" || plate[i] > "9") {
-          return false;
-        }
-      }
-      // se tudo passar a placa é válida
-      return true;
-    }
+    const maxYear = new Date().getFullYear() + 1;
+    const minYear = maxYear - 10;
 
-    if (!brand) errors.push("brand is required");
-    if (!model) errors.push("model is required");
+    if (!brand) {
+      errors.push("brand is required");
+    }
+    if (!model) {
+      errors.push("model is required");
+    }
     if (!year) {
       errors.push("year is required");
-    } else if (year < 2015 || year > 2025) {
-      errors.push("year must be between 2015 and 2025");
+    } else if (year < minYear || year > maxYear) {
+      errors.push(`year must be between ${minYear} and ${maxYear}`);
     }
     if (!plate) {
       errors.push("plate is required");
@@ -70,7 +70,6 @@ router.post("/cars", async (req, res) => {
     const newCar = await Car.create({ brand, model, year, plate });
     return res.status(201).json(newCar);
   } catch (error) {
-    console.error("Erro interno:", error);
     return res
       .status(500)
       .json({ errors: ["an internal server error occurred"] });
@@ -248,42 +247,6 @@ router.patch("/cars/:id", async (req, res) => {
 
     if (year && (year < 2015 || year > 2025)) {
       errors.push("year must be between 2015 and 2025");
-    }
-
-    function isValidPlate(plate) {
-      // Verifica se o comprimento é exatamente 8 caracteres
-      if (plate.length !== 8) {
-        return false;
-      }
-      // Verifica se os 3 primeiros caracteres são letras maiúsculas
-      for (let i = 0; i < 3; i++) {
-        if (plate[i] < "A" || plate[i] > "Z") {
-          return false;
-        }
-      }
-      // Verifica se o quarto caractere é um hífen
-      if (plate[3] !== "-") {
-        return false;
-      }
-      // Verifica se o quinto caractere é um número
-      if (isNaN(plate[4])) {
-        return false;
-      }
-      // Verifica se o sexto caractere é uma letra maiúscula ou um número
-      if (
-        (plate[5] < "A" || plate[5] > "Z") &&
-        (plate[5] < "0" || plate[5] > "9")
-      ) {
-        return false;
-      }
-      // Verifica se os dois últimos caracteres são números array 6 e 7
-      for (let i = 6; i < 8; i++) {
-        if (plate[i] < "0" || plate[i] > "9") {
-          return false;
-        }
-      }
-      // se tudo passar a placa é válida
-      return true;
     }
 
     if (plate && !isValidPlate(plate)) {
