@@ -166,10 +166,10 @@ router.get("/cars", async (req, res) => {
   try {
     const { year, final_plate, brand, page = 1, limit = 5 } = req.query;
 
-    const filters = {};
+    const filters: any = {};
 
     if (year) {
-      filters.year = { [Op.gte]: year };
+      filters.year = { [Op.gte]: Number(year) };
     }
 
     if (final_plate) {
@@ -195,7 +195,7 @@ router.get("/cars", async (req, res) => {
     return res.status(200).json({
       count: cars.count,
       pages: totalPages,
-      data: cars.rows,
+      data: cars.rows || [],
     });
   } catch (error) {
     console.error("Erro interno:", error);
